@@ -21,13 +21,13 @@ async def bus_stream(ws: WebSocket):
             await aether_bus.publish(envelope)
 
             # simple inline consumer for now
-            ir = await process_intent(envelope.payload)
+            result = await process_intent(envelope.payload)
 
             await ws.send_json({
                 "intent_id": intent_id,
-                "ir": ir["ir"],
-                "governor_status": ir["governor_status"],
-                "shannon_entropy": ir["shannon_entropy"],
+                "contract": result["contract"],
+                "governor_status": result["governor_status"],
+                "shannon_entropy": result["shannon_entropy"],
             })
     except WebSocketDisconnect:
         return

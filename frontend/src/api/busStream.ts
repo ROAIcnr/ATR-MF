@@ -9,7 +9,7 @@ export interface BusFrameIn {
 
 export interface BusFrameOut {
   intent_id: string;
-  ir: any;               // later strongly typed with IR8D
+  contract: any;               // later strongly typed with ManifestContract
   governor_status: string;
   shannon_entropy: number;
 }
