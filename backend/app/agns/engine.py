@@ -1,35 +1,35 @@
 from typing import Dict, Any
-from .aeth_contract import compile_aeth_contract
-from .ir_manifold import build_ir_from_contract
+from .dsl import extract_intent
+from .morphology import MorphologyCompiler
 from .governor import RuntimeGovernor, GovernorDecision
 
 governor = RuntimeGovernor()
+compiler = MorphologyCompiler()
 
 async def process_intent(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     :param payload: { raw_text, context_vector, emotional_valence, energy_level, ... }
-    :return: validated 8D IR ready for frontend
+    :return: validated Manifest Contract ready for frontend
     """
-    # L2: AGNS – parse + MRDE placeholder
-    # TODO: implement MRDE; currently pass-through with basic fields
-    contract = compile_aeth_contract(payload)
+    # L2: AGNS - Intent Extraction -> AETH DSL
+    dsl = extract_intent(payload)
 
-    # L4: IR – 8D canonical representation
-    ir = build_ir_from_contract(contract)
+    # L4: Morphology Compiler -> Manifest Contract
+    contract = compiler.compile(dsl)
 
-    # L5: Governor – Patimokkha + clamping
-    decision: GovernorDecision = governor.evaluate(ir)
+    # L5: Governor Verification - Patimokkha + clamping
+    decision: GovernorDecision = governor.evaluate(contract)
 
     if decision.action in ("CLAMPED", "PASSED"):
         return {
-            "ir": decision.ir,
+            "contract": decision.contract,
             "governor_status": decision.action,
             "shannon_entropy": decision.shannon_entropy,
         }
     else:
         # NIRODHA or REJECTED ⇒ send safe void
         return {
-            "ir": governor.safe_void(),
+            "contract": governor.safe_void_contract(),
             "governor_status": decision.action,
             "shannon_entropy": decision.shannon_entropy,
         }
