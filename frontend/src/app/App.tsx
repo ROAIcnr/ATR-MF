@@ -12,7 +12,15 @@ function App() {
   useEffect(() => {
     if (canvasRef.current && !rendererRef.current) {
       rendererRef.current = new AetherRenderer(canvasRef.current);
+      rendererRef.current.resize(window.innerWidth, window.innerHeight);
     }
+
+    const handleResize = () => {
+      if (rendererRef.current) {
+        rendererRef.current.resize(window.innerWidth, window.innerHeight);
+      }
+    };
+    window.addEventListener('resize', handleResize);
 
     const ws = connectBus((frame: BusFrameOut) => {
       setStatus(`Connected | Governor: ${frame.governor_status} | Entropy: ${frame.shannon_entropy.toFixed(4)}`);
@@ -26,6 +34,10 @@ function App() {
 
     return () => {
       ws.close();
+      window.removeEventListener('resize', handleResize);
+      if (rendererRef.current) {
+         rendererRef.current.dispose();
+      }
     };
   }, []);
 
